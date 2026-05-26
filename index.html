@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Comic Collection</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        /* iOS Safari overscroll herstel */
+        .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 1rem); }
+        .safe-top { padding-top: calc(env(safe-area-inset-top) + 1rem); }
+    </style>
+</head>
+<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('library');
+            const [isDarkMode, setIsDarkMode] = useState(false);
+            const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+            const [addType, setAddType] = useState('library'); // 'library' of 'watchlist'
+
+            // Systeem donkere modus volgen
+            useEffect(() => {
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setIsDarkMode(systemPrefersDark);
+                if (systemPrefersDark) document.documentElement.classList.add('dark');
+            }, []);
+
+            const toggleTheme = () => {
+                setIsDarkMode(!isDarkMode);
+                document.documentElement.classList.toggle('dark');
+            };
+
+            return (
+                <div class="min-h-screen flex flex-col justify-between relative pb-36">
+                    
+                    {/* FIXED HEADER (Sonos-stijl: Bold, clean, veel ademruimte) */}
+                    <header class="sticky top-0 z-40 bg-zinc-50/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 px-6 pt-12 pb-4 flex items-center justify-between">
+                        <h1 class="text-3xl font-bold tracking-tight capitalize">
+                            {activeTab}
+                        </h1>
+                        <div class="flex items-center gap-2">
+                            <button aria-label="Search items" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300">
+                                <i data-lucide="search" class="w-5 h-5"></i>
+                            </button>
+                            <button aria-label="Filter items" class="w-11 h-11 flex items-center justify-center rounded-full hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300">
+                                <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main class="flex-1 px-6 py-6">
+                        {activeTab === 'library' && (
+                            <div class="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                                <div class="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-zinc-400">
+                                    <i data-lucide="library" class="w-8 h-8"></i>
+                                </div>
+                                <h2 class="text-xl font-medium tracking-tight">Your library is waiting</h2>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Scan a barcode or enter an ISBN to catalog your first comic book run.</p>
+                            </div>
+                        )}
+
+                        {activeTab === 'watchlist' && (
+                            <div class="flex flex-col items-center justify-center text-center py-20 space-y-4">
+                                <div class="w-16 h-16 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-zinc-400">
+                                    <i data-lucide="eye" class="w-8 h-8"></i>
+                                </div>
+                                <h2 class="text-xl font-medium tracking-tight">Hunting for deals</h2>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm max-w-xs">Add items here to monitor webshop price drops automatically.</p>
+                            </div>
+                        )}
+
+                        {activeTab === 'settings' && (
+                            <div class="space-y-8 max-w-md mx-auto">
+                                <div class="space-y-2">
+                                    <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Appearance</h3>
+                                    <div class="bg-white dark:bg-zinc-900 rounded-2xl p-4 border border-zinc-200/60 dark:border-zinc-800/60 flex items-center justify-between">
+                                        <span class="text-base font-medium">Dark mode</span>
+                                        <button onClick={toggleTheme} aria-label="Toggle dark mode" class="w-12 h-6 bg-zinc-200 dark:bg-zinc-700 rounded-full relative p-0.5 transition-colors duration-200">
+                                            <div class="w-5 h-5 bg-white rounded-full shadow-sm transform dark:translate-x-6 transition-transform duration-200"></div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* FLOATING SHELL (Zwevende Nav-Pil links, exact matchende FAB rechts) */}
+                    <div class="fixed bottom-0 left-0 right-0 px-6 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 bg-gradient-to-t from-zinc-50 via-zinc-50/90 to-transparent dark:from-zinc-950 dark:via-zinc-950/90 pointer-events-none flex items-center justify-between z-40">
+                        
+                        {/* Nav-Pil */}
+                        <nav class="pointer-events-auto bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xl backdrop-blur-lg rounded-full px-2 py-1.5 flex items-center gap-1">
+                            <button onClick={() => setActiveTab('library')} aria-label="Library" class={`w-11 h-11 flex items-center justify-center rounded-full transition-colors ${activeTab === 'library' ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}>
+                                <i data-lucide="library" class="w-5 h-5"></i>
+                            </button>
+                            <button onClick={() => setActiveTab('watchlist')} aria-label="Watchlist" class={`w-11 h-11 flex items-center justify-center rounded-full transition-colors ${activeTab === 'watchlist' ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}>
+                                <i data-lucide="eye" class="w-5 h-5"></i>
+                            </button>
+                            <button onClick={() => setActiveTab('settings')} aria-label="Settings" class={`w-11 h-11 flex items-center justify-center rounded-full transition-colors ${activeTab === 'settings' ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50'}`}>
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                            </button>
+                        </nav>
+
+                        {/* FAB Knop: Exact dezelfde styling, blur en schaduw als de nav-pil */}
+                        <button onClick={() => setIsOverlayOpen(true)} aria-label="Add new item" class="pointer-events-auto w-14 h-14 bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/80 dark:border-zinc-800/80 shadow-xl backdrop-blur-lg rounded-full flex items-center justify-center text-zinc-900 dark:text-zinc-50 active:scale-95 transition-transform">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    {/* SLIDE-UP OVERLAY (De gezochte premium sheet/drawer flow) */}
+                    <div class={`fixed inset-0 z-50 transition-visibility duration-300 ${isOverlayOpen ? 'visible' : 'invisible'}`}>
+                        {/* Backdrop fade */}
+                        <div onClick={() => setIsOverlayOpen(false)} class={`absolute inset-0 bg-zinc-950/40 backdrop-blur-xs transition-opacity duration-300 ${isOverlayOpen ? 'opacity-100' : 'opacity-0'}`}></div>
+                        
+                        {/* Drawer body */}
+                        <div class={`absolute bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 rounded-t-[2.5rem] border-t border-zinc-200 dark:border-zinc-800 max-h-[92vh] flex flex-col transition-transform duration-300 transform ${isOverlayOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+                            
+                            {/* Overlay Header */}
+                            <div class="px-6 pt-6 pb-4 border-b border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between">
+                                <button onClick={() => setIsOverlayOpen(false)} class="text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 h-11 flex items-center">Cancel</button>
+                                <h2 class="text-lg font-bold tracking-tight">Add item</h2>
+                                <div class="w-12"></div> {/* Spacer voor balans */}
+                            </div>
+
+                            {/* Overlay Form Content */}
+                            <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6 pb-20">
+                                
+                                {/* SPLIT TOGGLE: Library vs Watchlist (Segmented Control) */}
+                                <div class="bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl flex">
+                                    <button onClick={() => setAddType('library')} class={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all ${addType === 'library' ? 'bg-white dark:bg-zinc-700 shadow-xs text-zinc-900 dark:text-zinc-50' : 'text-zinc-500'}`}>
+                                        Add to library
+                                    </button>
+                                    <button onClick={() => setAddType('watchlist')} class={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all ${addType === 'watchlist' ? 'bg-white dark:bg-zinc-700 shadow-xs text-zinc-900 dark:text-zinc-50' : 'text-zinc-500'}`}>
+                                        Add to watchlist
+                                    </button>
+                                </div>
+
+                                {/* ISBN / SCAN CODE ROW */}
+                                <div class="space-y-2">
+                                    <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Barcode or code</label>
+                                    <div class="flex gap-2">
+                                        <input type="number" inputmode="numeric" placeholder="Enter EAN or ISBN" class="flex-1 h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none focus:border-zinc-900 dark:focus:border-zinc-50" />
+                                        <button class="h-11 px-4 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-center gap-2 text-sm font-medium">
+                                            <i data-lucide="scan-line" class="w-4 h-4"></i> Scan
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-zinc-100 dark:border-zinc-800/60 my-2"></div>
+
+                                {/* CONDITIONELE VELDEN OP BASIS VAN DE SPLIT TOGGLE */}
+                                {addType === 'library' ? (
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Format</label>
+                                            <select class="w-full h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none">
+                                                <option>TPB (Trade paperback)</option>
+                                                <option>Hardcover</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Purchase price</label>
+                                            <input type="number" step="0.01" placeholder="0.00" class="w-full h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Date of purchase</label>
+                                            <input type="date" class="w-full h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none" />
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Store location</label>
+                                            <input type="text" placeholder="Shop name" class="w-full h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none" />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Target price</label>
+                                            <input type="number" step="0.01" placeholder="0.00" class="w-full h-11 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 text-base focus:outline-none" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div class="space-y-2">
+                                    <label class="text-xs font-semibold uppercase tracking-wider text-zinc-400">Notes</label>
+                                    <textarea rows="3" placeholder="Add personal thoughts or tags" class="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 text-base focus:outline-none"></textarea>
+                                </div>
+
+                                <button onClick={() => setIsOverlayOpen(false)} class="w-full h-12 bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-950 font-medium rounded-xl shadow-md transition-transform active:scale-[0.99]">
+                                    Save comic
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            );
+        }
+
+        // Render de app en start de icons direct door lucide.createIcons() te triggeren
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+        
+        // Zorg ervoor dat icons up-to-date blijven bij UI veranderingen
+        setTimeout(() => lucide.createIcons(), 200);
+        window.addEventListener('click', () => setTimeout(() => lucide.createIcons(), 50));
+    </script>
+</body>
+</html>
